@@ -103,11 +103,12 @@ object ImageUtils {
         // Graphics2D를 사용한 고품질 리사이징
         val resized = BufferedImage(newWidth, newHeight, imageType)
         resized.createGraphics().apply {
-            // 고품질 보간 설정
-            setRenderingHint(
-                java.awt.RenderingHints.KEY_INTERPOLATION,
-                java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR
-            )
+            // 보다 높은 품질의 리사이징을 위해 여러 렌더링 힌트를 설정합니다.
+            setRenderingHints(mapOf(
+                java.awt.RenderingHints.KEY_INTERPOLATION to java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC,
+                java.awt.RenderingHints.KEY_RENDERING to java.awt.RenderingHints.VALUE_RENDER_QUALITY,
+                java.awt.RenderingHints.KEY_ANTIALIASING to java.awt.RenderingHints.VALUE_ANTIALIAS_ON
+            ))
             drawImage(original, 0, 0, newWidth, newHeight, null)
             dispose()
         }
@@ -127,20 +128,22 @@ object ImageUtils {
         val readers = ImageIO.getImageReadersBySuffix(file.extension)
         require(readers.hasNext()) { "Unsupported image type for file: ${file.absolutePath}" }
         val reader = readers.next()
-        val inputStream = file.inputStream()
 
-        try {
-            reader.input = ImageIO.createImageInputStream(inputStream)
+        return file.inputStream().use { inputStream ->
+            ImageIO.createImageInputStream(inputStream).use { imageInputStream ->
+                try {
+                    reader.input = imageInputStream
 
-            val width = reader.getWidth(0)
-            val height = reader.getHeight(0)
-            val format = detectFormat(file)
-            val sizeInBytes = file.length()
+                    val width = reader.getWidth(0)
+                    val height = reader.getHeight(0)
+                    val format = detectFormat(file)
+                    val sizeInBytes = file.length()
 
-            return ImageInfo(width, height, format, sizeInBytes)
-        } finally {
-            reader.dispose()
-            inputStream.close()
+                    ImageInfo(width, height, format, sizeInBytes)
+                } finally {
+                    reader.dispose()
+                }
+            }
         }
     }
 

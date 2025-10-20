@@ -50,6 +50,11 @@ fun loadAndResize(file: File, maxSize: Int = 800): ImageData {
 
     val resized = BufferedImage(newWidth, newHeight, imageType)
     resized.createGraphics().apply {
+        // 고품질 보간 설정
+        setRenderingHint(
+            java.awt.RenderingHints.KEY_INTERPOLATION,
+            java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR
+        )
         drawImage(original, 0, 0, newWidth, newHeight, null)
         dispose()
     }
