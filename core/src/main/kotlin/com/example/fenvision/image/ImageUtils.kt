@@ -93,12 +93,24 @@ object ImageUtils {
         // BufferedImage로 변환
         val original = imageDataToBufferedImage(imageData)
 
-        // 리사이징
-        val scaled = original.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH)
-        val resized = BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB)
-        val graphics = resized.createGraphics()
-        graphics.drawImage(scaled, 0, 0, null)
-        graphics.dispose()
+        // 알파 채널 보존을 위한 이미지 타입 결정
+        val imageType = if (original.colorModel.hasAlpha()) {
+            BufferedImage.TYPE_INT_ARGB
+        } else {
+            BufferedImage.TYPE_INT_RGB
+        }
+
+        // Graphics2D를 사용한 고품질 리사이징
+        val resized = BufferedImage(newWidth, newHeight, imageType)
+        resized.createGraphics().apply {
+            // 고품질 보간 설정
+            setRenderingHint(
+                java.awt.RenderingHints.KEY_INTERPOLATION,
+                java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR
+            )
+            drawImage(original, 0, 0, newWidth, newHeight, null)
+            dispose()
+        }
 
         return bufferedImageToImageData(resized, imageData.format)
     }
@@ -112,7 +124,9 @@ object ImageUtils {
     fun getImageInfo(file: File): ImageInfo {
         require(file.exists()) { "File does not exist: ${file.absolutePath}" }
 
-        val reader = ImageIO.getImageReadersBySuffix(file.extension).next()
+        val readers = ImageIO.getImageReadersBySuffix(file.extension)
+        require(readers.hasNext()) { "Unsupported image type for file: ${file.absolutePath}" }
+        val reader = readers.next()
         val inputStream = file.inputStream()
 
         try {
@@ -137,15 +151,16 @@ object ImageUtils {
         bufferedImage: BufferedImage,
         format: ImageFormat
     ): ImageData {
-        val outputStream = ByteArrayOutputStream()
         val formatName = when (format) {
             ImageFormat.PNG -> "png"
             ImageFormat.JPEG -> "jpg"
             ImageFormat.UNKNOWN -> "png"  // 기본값
         }
 
-        ImageIO.write(bufferedImage, formatName, outputStream)
-        val bytes = outputStream.toByteArray()
+        val bytes = ByteArrayOutputStream().use { outputStream ->
+            ImageIO.write(bufferedImage, formatName, outputStream)
+            outputStream.toByteArray()
+        }
 
         return ImageData(
             pixels = bytes,
@@ -159,8 +174,9 @@ object ImageUtils {
      * ImageData를 BufferedImage로 변환합니다.
      */
     private fun imageDataToBufferedImage(imageData: ImageData): BufferedImage {
-        val inputStream = ByteArrayInputStream(imageData.pixels)
-        return ImageIO.read(inputStream)
+        return ByteArrayInputStream(imageData.pixels).use { inputStream ->
+            ImageIO.read(inputStream)
+        }
     }
 
     /**

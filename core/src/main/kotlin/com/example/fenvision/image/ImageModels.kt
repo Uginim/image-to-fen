@@ -9,6 +9,8 @@ data class ImageData(
     val height: Int,        // 높이
     val format: ImageFormat // 포맷
 ) {
+    // Note: data class는 ByteArray를 참조로만 비교하므로
+    // 내용 기반 비교를 위해 equals/hashCode를 수동으로 오버라이드합니다
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

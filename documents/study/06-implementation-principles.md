@@ -33,18 +33,28 @@
 // 원본: 4000x3000 (12MB)
 // 리사이징: 800x600 (500KB)
 
-fun loadAndResize(file: File, maxSize: Int = 800): ByteArray {
-    val bitmap = BitmapFactory.decodeFile(file.path)
+fun loadAndResize(file: File, maxSize: Int = 800): ImageData {
+    val original = ImageIO.read(file)
 
     // 비율 유지하며 리사이징
-    val ratio = maxSize.toFloat() / max(bitmap.width, bitmap.height)
-    val newWidth = (bitmap.width * ratio).toInt()
-    val newHeight = (bitmap.height * ratio).toInt()
+    val ratio = maxSize.toFloat() / max(original.width, original.height)
+    val newWidth = (original.width * ratio).toInt()
+    val newHeight = (original.height * ratio).toInt()
 
-    val resized = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
-    bitmap.recycle()  // 메모리 해제
+    // 알파 채널 보존
+    val imageType = if (original.colorModel.hasAlpha()) {
+        BufferedImage.TYPE_INT_ARGB
+    } else {
+        BufferedImage.TYPE_INT_RGB
+    }
 
-    return bitmapToByteArray(resized)
+    val resized = BufferedImage(newWidth, newHeight, imageType)
+    resized.createGraphics().apply {
+        drawImage(original, 0, 0, newWidth, newHeight, null)
+        dispose()
+    }
+
+    return bufferedImageToImageData(resized)
 }
 ```
 
