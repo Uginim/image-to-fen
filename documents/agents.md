@@ -1,6 +1,6 @@
 # Claude Code Agent 가이드
 
-Image-to-FEN 프로젝트는 **5개의 특별한 Claude Code Agent**를 제공합니다.
+Image-to-FEN 프로젝트는 **6개의 특별한 Claude Code Agent**를 제공합니다.
 
 ## 📚 학습서 Agent (`/learn`)
 
@@ -216,71 +216,180 @@ Image-to-FEN 프로젝트는 **5개의 특별한 Claude Code Agent**를 제공�
 
 ---
 
-## 🔍 PR Review Agent (`/pr-review`)
+## 📤 PR Manager Agent (`/pr`)
 
-PR 리뷰 피드백을 자동으로 확인하고 대응합니다.
+GitHub Pull Request의 생성, 업데이트, 전체 라이프사이클을 관리합니다.
 
 ### 사용법
 
-```
-/pr-review [PR 번호]
-```
-
-### 예시
-
 ```bash
-# 현재 브랜치의 PR 확인
-/pr-review
+# PR 생성
+/pr create
 
-# 특정 PR 번호 지정
-/pr-review 2
+# PR 업데이트
+/pr update <NUMBER>
 
-# 학습 자료 자동 생성
-/pr-review --learn
+# PR 리뷰 대응
+/pr review <NUMBER>
 ```
 
-### 하는 일
+### 주요 명령어
 
-**1. 피드백 수집**
+#### 1. `/pr create` - 새 PR 생성
+
+**자동으로 하는 일**:
+1. ✅ 브랜치 분석 (커밋, 변경사항)
+2. ✅ 모든 테스트 실행 (필수!)
+3. ✅ PR 타이틀 자동 생성
+   - 형식: `type: Brief description`
+   - 예: `feat: Add perspective transform`
+4. ✅ 구조화된 PR 본문 생성
+5. ✅ GitHub CLI로 PR 생성
+6. ✅ CI/CD 체크 모니터링
+
+**예시**:
 ```bash
-gh api repos/.../pulls/2/reviews
-gh api repos/.../pulls/2/comments
+# 기본 사용
+/pr create
+
+# Base 브랜치 지정
+/pr create --base develop
+
+# Draft PR
+/pr create --draft
 ```
 
-**2. 우선순위 분류**
-- 🔴 High: 버그, 리소스 누수, 보안
-- 🟡 Medium: 성능, 코드 품질
-- 🟢 Low: 스타일, 네이밍
-- 📚 Learning: 학습 필요
+#### 2. `/pr update <NUMBER>` - 기존 PR 업데이트
 
-**3. 자동 수정**
-- 코드 수정 제안
-- 테스트 실행
-- 논리적 커밋
+**자동으로 하는 일**:
+1. ✅ 새 커밋 감지
+2. ✅ 변경사항 분석
+3. ✅ 변경 이력 추가 (타임스탬프)
+4. ✅ PR 본문 업데이트 (기존 내용 보존)
+5. ✅ 검증 및 확인
 
-**4. 학습 자료 생성** (선택)
-- 중요한 개념은 `/learn` 자동 호출
-- `documents/study/` 저장
+**예시**:
+```bash
+/pr update 2
+/pr update 5 --reason "Apply review feedback"
+```
 
-**5. PR 업데이트**
-- 수정사항 푸시
-- 명확한 커밋 메시지
+#### 3. `/pr review <NUMBER>` - 리뷰 피드백 대응
+
+**자동으로 하는 일**:
+1. ✅ 일반 코멘트 + 인라인 코멘트 모두 수집
+2. ✅ 우선순위 자동 분류 (High/Medium/Low)
+3. ✅ 피드백 대응 및 수정
+4. ✅ 테스트 실행 및 검증
+5. ✅ 학습 자료 생성 (선택)
+6. ✅ PR 업데이트
+
+**예시**:
+```bash
+/pr review 2
+/pr review 3 --learn  # 학습 자료도 생성
+```
+
+### PR 타이틀 형식
+
+프로젝트 컨벤션:
+```
+type: Brief description in English
+```
+
+**Types**:
+- `feat`: 새 기능
+- `fix`: 버그 수정
+- `docs`: 문서
+- `refactor`: 리팩토링
+- `test`: 테스트
+- `chore`: 기타
+- `perf`: 성능 개선
+
+### PR 본문 구조
+
+```markdown
+## Summary
+[1-3 문장 요약]
+
+## Changes
+### Implementation
+- [상세 변경사항]
+
+### Tests
+- [테스트 결과]
+
+### Documentation
+- [문서 업데이트]
+
+## Breaking Changes
+[있다면]
+
+## Review Focus
+[리뷰 포인트]
+```
 
 ### 특징
 
-- ✅ **완전한 대응**: 모든 피드백 처리
-- 📚 **학습 자료화**: 중요 개념 문서화
-- ✅ **테스트 필수**: 수정 후 검증
-- 📝 **명확한 커밋**: 무엇을 왜 고쳤는지
+- 🚀 **완전 자동화**: 생성부터 머지까지
+- 📊 **구조화된 본문**: 리뷰어 이해도 향상
+- ✅ **테스트 필수**: 모든 테스트 통과 확인
+- 📝 **변경 이력 추적**: 업데이트 내역 자동 기록
+- 🔍 **인라인 코멘트**: 코드 라인별 피드백 처리
 
 ### 실제 사용 예시
 
-PR #2에서 3가지 피드백:
-1. 리소스 누수 (High) → 즉시 수정 + 테스트
-2. BICUBIC 보간 (Medium) → 수정 + 성능 비교
-3. 문서 동기화 (Low) → 일괄 처리
+**시나리오**: Phase 2 원근 변환 기능 구현 완료
 
-→ 3개 커밋 + 학습 문서 (882줄!)
+```bash
+# 1. 테스트 확인
+./gradlew test
+
+# 2. PR 생성
+/pr create
+
+# 생성 결과:
+# - Title: feat: Add perspective transform for board detection
+# - Body: 구조화된 8개 섹션
+# - URL: https://github.com/Uginim/image-to-fen/pull/5
+# - CI/CD: Running...
+
+# 3. 리뷰 받음 → 피드백 3개
+/pr review 5
+
+# 자동 처리:
+# - High: 메모리 누수 → 즉시 수정
+# - Medium: 성능 개선 → 분석 + 수정
+# - Low: 네이밍 → 일괄 처리
+
+# 4. 수정사항 푸시됨 → PR 업데이트
+/pr update 5 --reason "Apply reviewer feedback"
+
+# 변경 이력 추가:
+# ## 📝 Change History
+# ### Update 2025-10-29 14:30
+# - Fix memory leak in warpPerspective()
+# - Improve performance with ROI
+# - Rename variables for clarity
+```
+
+---
+
+## 🔍 PR Review Agent (`/pr-review`)
+
+**⚠️ 이 에이전트는 `/pr review`에 통합되었습니다.**
+
+새 PR Agent (`/pr`)를 사용하세요:
+```bash
+# 대신 이렇게 사용
+/pr review <NUMBER>
+```
+
+기존 `/pr-review` 기능:
+- ✅ 모든 기능이 `/pr review`로 이동
+- ✅ 더 나은 인라인 코멘트 처리
+- ✅ 자동 업데이트 통합
+- ✅ 일관된 워크플로우
 
 ---
 
@@ -350,30 +459,44 @@ PR #2에서 3가지 피드백:
 
 ---
 
-### 권장 워크플로우 3: PR 리뷰 대응
+### 권장 워크플로우 3: PR 생성과 리뷰
 
-**1단계: 피드백 확인**
+**1단계: PR 생성**
 ```bash
-/pr-review 2
+# 구현 완료 후
+./gradlew test
+/pr create
 ```
 
-**2단계: 자동 수정**
+**2단계: 리뷰 피드백 대응**
+```bash
+# 리뷰 코멘트 받음
+/pr review 2
+```
+
+**자동 처리**:
 - High Priority → 즉시 수정
 - Medium Priority → 분석 후 수정
 - Low Priority → 일괄 처리
+- Learning → `/learn` 자동 호출
 
-**3단계: 학습 자료** (자동)
-- 중요한 개념 → `/learn` 자동 호출
+**3단계: 업데이트**
+```bash
+# 추가 커밋 후
+/pr update 2
+```
 
-**4단계: 커밋 & 푸시**
-- 논리적 커밋
-- 명확한 메시지
+**4단계: 머지**
+```bash
+# 모든 체크 통과 후
+gh pr merge 2 --squash
+```
 
 **결과**:
+- ✅ 체계적인 PR 관리
 - ✅ 모든 피드백 반영
 - ✅ 학습 자료 생성
-- ✅ 테스트 통과
-- ✅ 깔끔한 커밋 히스토리
+- ✅ 깔끔한 히스토리
 
 ---
 
@@ -479,12 +602,12 @@ Phase 3: 테스트 (1시간)
 - 📷 "조명 불균형 해결?"
 - 🎨 **목적**: 이미지/영상 처리 알고리즘
 
-### `/pr-review` - PR 리뷰 받았을 때
-- 🔍 "피드백을 어떻게 반영하지?"
-- 🔍 "우선순위가 뭐야?"
-- 🔍 "학습 자료도 만들어줘"
-- 🔍 "테스트까지 실행해줘"
-- ✅ **목적**: PR 피드백 자동 대응
+### `/pr` - GitHub PR 관리할 때
+- 📤 "PR을 생성해줘"
+- 📤 "PR을 업데이트해줘"
+- 📤 "리뷰 피드백에 대응해줘"
+- 📤 "변경 이력을 추가해줘"
+- ✅ **목적**: PR 전체 라이프사이클 관리
 
 ---
 
