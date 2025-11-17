@@ -4,6 +4,339 @@
 
 ---
 
+## 2025-11-17 (일) - TODO 문서화 & 프로젝트 현황 분석
+
+### 📋 전체 요약
+- 프로젝트 전체 구조 및 현황 분석
+- 남은 과업 식별 및 우선순위 분류
+- 상세한 TODO 문서 작성 (711줄)
+- Phase 2-7 작업 계획 수립
+
+---
+
+### 🔍 프로젝트 현황 분석
+
+#### 1. 현재 아키텍처 확인
+**분석 내용**:
+- 2-module 구조 (`:core`, `:demo-cli`)
+- `documents/skeleton.md`는 5-module 계획이지만 현재 미구현
+- 실제 구현은 `:core`에 통합되어 있음
+
+**현재 모듈**:
+```
+:core/
+├── fen/          - FenBuilder, FenParser, BoardCell
+├── image/        - ImageUtils, ImageModels (Phase 1 완료)
+├── vision/       - BoardDetector, GridExtractor 인터페이스
+├── ml/           - PieceClassifier 인터페이스
+└── engine/       - FenEngine, Api
+
+:demo-cli/
+└── demo/         - DummyBoardDetector, DummyGridExtractor, DummyPieceClassifier
+```
+
+#### 2. 완료 항목 확인
+**Phase 1 (100% 완료)**:
+- ✅ 이미지 처리 (`ImageUtils.kt`, `ImageModels.kt`)
+  - BICUBIC 보간법 + 앤티에일리어싱
+  - 메모리 최적화 (36MB → 5MB)
+  - 7개 단위 테스트 통과
+- ✅ FEN 처리 (`FenBuilder.kt`, `FenParser.kt`)
+- ✅ 아키텍처 설계 (인터페이스 기반)
+- ✅ Agent 시스템 (5개 에이전트)
+- ✅ 학습 문서 (7개 문서, 총 882줄)
+
+**Phase 5 (100% 완료)**:
+- ✅ FEN 생성 로직 (`FenBuilder.build()`)
+
+#### 3. 미구현 항목 확인
+**Phase 2 (0%)**:
+- ❌ 체스판 검출 (원근 변환)
+- ❌ OpenCV 통합
+- ❌ ManualBoardDetector 구현
+- ❌ AutoBoardDetector 구현 (선택)
+
+**Phase 3 (0%)**:
+- ❌ 64칸 분할 (SimpleGridExtractor)
+- ❌ 적응적 분할 (선택)
+
+**Phase 4 (0%)**:
+- ❌ 데이터셋 준비
+- ❌ ML 모델 학습 (Teachable Machine or TensorFlow)
+- ❌ TFLite 통합
+- ❌ TFLitePieceClassifier 구현
+
+**Phase 6 (0%)**:
+- ❌ 전체 파이프라인 통합
+- ❌ 성능 최적화
+- ❌ CLI 개선
+
+---
+
+### 📝 TODO 문서 작성
+
+#### 커밋: `4712668` - TODO 문서 생성
+**날짜**: 2025-11-17
+
+**생성 파일**: `documents/TODO.md` (**711줄**)
+
+**문서 구조**:
+1. **전체 진행 상황** (표로 정리)
+   - Phase별 상태, 진행률, 예상 기간, 우선순위
+   - 현재 10% 완료 (Phase 1 + Phase 5)
+
+2. **Phase 1 완료 항목** (상세)
+   - 이미지 처리 유틸리티
+   - FEN 처리
+   - 아키텍처 설계
+   - 테스트
+   - Agent 시스템
+   - 문서화
+
+3. **Phase 2: 체스판 검출** (다음 작업)
+   - 데이터 모델 정의 (CornerPoints, BoardWarpResult)
+   - OpenCV 통합
+   - ManualBoardDetector 구현 (MVP, 우선순위 High)
+   - AutoBoardDetector 구현 (선택, 우선순위 Medium)
+   - 학습 자료 생성
+   - 통합 테스트
+
+4. **Phase 3: 64칸 분할**
+   - 데이터 모델 검증
+   - SimpleGridExtractor 구현 (우선순위 High)
+   - AdaptiveGridExtractor 구현 (선택, 우선순위 Low)
+   - 테스트 작성
+
+5. **Phase 4: ML 모델 통합**
+   - 데이터셋 준비 (13개 클래스, 각 300+ 이미지)
+   - Option A: Teachable Machine (30분, 85-90% 정확도)
+   - Option B: TensorFlow + MobileNetV3 (1-2시간, 90-95% 정확도)
+   - TFLite 변환 및 INT8 양자화
+   - Kotlin/JVM 통합 (TFLitePieceClassifier)
+   - 평가 및 최적화 (혼동 행렬, 배치 처리)
+   - 테스트 작성
+
+6. **Phase 6: 통합 및 최적화**
+   - 전체 파이프라인 통합
+   - CLI 개선 (명령줄 인자, 디버깅 옵션)
+   - 성능 최적화 (메모리, 속도)
+   - 정확도 평가 도구
+
+7. **Phase 7: Android 앱** (선택)
+   - Android 모듈 생성
+   - UI 구현 (카메라, 코너 지정, 결과 표시)
+   - 통합 및 최적화
+
+8. **향후 개선 사항**
+   - 단기: 자동 검출, 다양한 체스 세트, 조명 보정
+   - 중기: Android 앱, 멀티 프레임, 온라인 통합
+   - 장기: iOS, 웹, 스트리밍, 게임 분석
+
+9. **즉시 작업 체크리스트** (Phase 2)
+   - [ ] `/design 원근 변환으로 체스판 보정`
+   - [ ] `/vision 호모그래피 행렬 계산`
+   - [ ] 데이터 모델 작성
+   - [ ] OpenCV 통합
+   - [ ] TDD로 구현
+   - [ ] 학습 자료 생성
+
+10. **리스크 및 대응**
+    - ML 정확도 부족 → 더 많은 데이터, 앙상블
+    - 저사양 기기 성능 → INT8 양자화, 배치 처리
+    - 다양한 체스 세트 → 데이터 증강, Fine-tuning
+    - 조명 조건 → CLAHE, 사용자 가이드
+
+11. **성공 기준**
+    - 기술: 정확도 85%+, 속도 < 2초, 메모리 < 50MB
+    - 품질: 테스트 커버리지 80%+, 모든 Phase 문서화
+    - 학습: 컴퓨터 비전, 머신러닝, 소프트웨어 설계, 성능 최적화
+
+12. **개발 워크플로우**
+    - 새 기능: `/design` → TDD → `/learn`
+    - ML: `/ml` 단계별 가이드
+    - 이미지 처리: `/vision` → `/design` → 구현 → `/learn`
+    - PR 리뷰: `/pr-review` 자동 대응
+
+**특징**:
+- 체계적인 Phase별 분류
+- 우선순위 표시 (🔴 High, 🟡 Medium, 🟢 Low)
+- 상태 표시 (✅ 완료, 🚧 다음, ⏳ 예정, 💭 선택)
+- 예상 기간 명시
+- 상세한 체크리스트
+- 실행 가능한 명령어 예시
+
+**커밋 메시지**:
+```
+docs: Add comprehensive TODO list for remaining tasks
+
+남은 과업을 체계적으로 문서화했습니다:
+
+- Phase 1 완료 항목 정리 (이미지 처리, FEN, Agent 시스템)
+- Phase 2-7 상세 작업 목록 (체스판 검출, 64칸 분할, ML 통합, 최적화, Android 앱)
+- 각 Phase별 우선순위, 예상 기간, 체크리스트 제공
+- 리스크 분석 및 대응 방안
+- 개발 워크플로우 가이드
+- 성공 기준 및 목표 정의
+
+이 문서를 통해 프로젝트의 남은 작업을 한눈에 파악하고
+체계적으로 진행할 수 있습니다.
+```
+
+---
+
+### 📊 통계 요약
+
+#### 새로 생성된 파일
+| 파일 | 라인 수 | 설명 |
+|------|---------|------|
+| `documents/TODO.md` | 711줄 | 남은 과업 상세 목록 |
+
+#### 분석한 파일
+- `documents/roadmap.md` - 프로젝트 로드맵 확인
+- `documents/work-log.md` - 이전 작업 이력 확인
+- `documents/requirements.md` - 요구사항 확인
+- `documents/skeleton.md` - 계획된 아키텍처 확인
+- `CLAUDE.md` - 프로젝트 가이드 확인
+- `README.md` - 프로젝트 개요 확인
+- 모든 Kotlin 소스 파일 (core/, demo-cli/)
+
+#### 커밋 이력
+```
+4712668 - docs: Add comprehensive TODO list for remaining tasks
+```
+
+---
+
+### 🎯 핵심 성과
+
+#### 1. 프로젝트 현황 명확화
+- Phase 1 완료 (이미지 처리 + FEN)
+- Phase 5 완료 (FEN 생성 로직)
+- Phase 2-4, 6 미착수 (체스판 검출, 분할, ML, 통합)
+- Phase 7 선택 사항 (Android 앱)
+
+#### 2. 작업 우선순위 수립
+**High Priority (MVP 필수)**:
+- Phase 2: 체스판 검출 (2-3일)
+- Phase 3: 64칸 분할 (1일)
+- Phase 4: ML 모델 통합 (5-7일)
+
+**Medium Priority**:
+- Phase 6: 통합 및 최적화 (2-3일)
+- Phase 2.5: 자동 코너 검출 (선택)
+
+**Low Priority**:
+- Phase 7: Android 앱 (7일, 선택)
+- Phase 3.5: 적응적 분할 (선택)
+
+#### 3. 명확한 로드맵
+- **현재 위치**: 10% 완료 (Phase 1 + Phase 5)
+- **다음 단계**: Phase 2 (체스판 검출)
+- **MVP 완성**: Phase 2-4 + Phase 6 완료 시 (~2-3주)
+- **최종 목표**: 정확도 85%+, 속도 < 2초, 무료 100%
+
+#### 4. 실행 가능한 계획
+- 즉시 시작할 작업 명확
+- Agent 활용 워크플로우 정의
+- TDD 접근법 명시
+- 리스크 사전 분석
+
+---
+
+### 💡 배운 것들
+
+#### 프로젝트 관리
+1. **문서화의 중요성**
+   - roadmap.md: 장기 비전과 Phase 정의
+   - work-log.md: 작업 이력과 학습 기록
+   - TODO.md: 남은 작업과 우선순위
+   - 세 문서가 상호 보완적
+
+2. **우선순위 판단**
+   - MVP 필수 기능 vs 선택 기능
+   - 수동 코너 지정 (MVP) vs 자동 검출 (나중)
+   - Teachable Machine (빠름) vs TensorFlow (정확)
+
+3. **체계적 접근**
+   - Phase별 분리
+   - 우선순위 표시
+   - 예상 기간 명시
+   - 체크리스트 제공
+
+#### 아키텍처 분석
+1. **현재 구조의 이해**
+   - skeleton.md의 5-module 계획
+   - 실제 구현은 2-module (core, demo-cli)
+   - 단순화된 구조로 빠른 프로토타입
+
+2. **의존성 주입 패턴**
+   - 인터페이스 기반 설계 (BoardDetector, GridExtractor, PieceClassifier)
+   - 테스트 용이성 (더미 구현체)
+   - 플랫폼 독립성
+
+3. **파이프라인 아키텍처**
+   - 4단계: 검출 → 분할 → 분류 → FEN
+   - 각 단계 독립적 교체 가능
+   - 명확한 인터페이스
+
+---
+
+### 🚀 다음 작업 (Phase 2)
+
+#### 즉시 시작
+1. **설계 문서 생성**
+   ```bash
+   /design 원근 변환으로 체스판 보정
+   /vision 호모그래피 행렬 계산
+   ```
+
+2. **데이터 모델 작성**
+   - `CornerPoints` 데이터 클래스
+   - `BoardWarpResult` 업데이트
+
+3. **OpenCV 통합**
+   - Gradle 의존성 추가
+   - 초기화 코드 작성
+   - 테스트 이미지 준비
+
+4. **TDD로 구현**
+   - `ManualBoardDetectorTest.kt` 작성 (Red)
+   - `ManualBoardDetector` 구현 (Green)
+   - 리팩토링 (Refactor)
+
+5. **학습 자료 생성**
+   - `/learn 원근 변환과 호모그래피 행렬`
+
+---
+
+### 📝 메모
+
+#### 잘한 점
+- ✅ 프로젝트 전체 구조 철저히 분석
+- ✅ roadmap.md와 work-log.md 참고하여 일관성 유지
+- ✅ 실행 가능한 상세 계획 수립
+- ✅ 우선순위 명확히 분류
+- ✅ 711줄의 상세한 문서 작성
+
+#### 개선할 점
+- ⚠️ 테스트 실행 실패 (네트워크 문제로 Gradle 다운로드 불가)
+- ⚠️ 실제 구현 전 더 상세한 기술 조사 필요 (OpenCV Java 바인딩)
+
+#### 다음 세션 전 준비
+- [ ] Phase 2 설계 문서 생성 (`/design`, `/vision`)
+- [ ] OpenCV 통합 조사
+- [ ] 테스트 이미지 준비 (정면, 비스듬한)
+- [ ] TDD 테스트 케이스 설계
+
+---
+
+**마지막 업데이트**: 2025-11-17
+**다음 작업**: Phase 2 시작 (체스판 검출)
+**브랜치**: `claude/complete-remaining-tasks-01WvANpquQSAJjh8jzUkUx2A`
+**예상 소요 시간**: 2-3일 (Phase 2 완료까지)
+
+---
+
 ## 2025-10-21 (월) - Phase 1 완료 & Agent 시스템 구축
 
 ### 📋 전체 요약
