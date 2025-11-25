@@ -5,6 +5,23 @@ package com.example.fenvision.vision
  * Actual implementation (OpenCV/other) will live in another module/app.
  */
 
+/**
+ * Represents a 2D point with x and y coordinates.
+ * Used for corner detection and board normalization.
+ */
+data class Point(val x: Double, val y: Double)
+
+/**
+ * Represents the four corners of a chessboard in clockwise order.
+ * topLeft -> topRight -> bottomRight -> bottomLeft
+ */
+data class CornerPoints(
+    val topLeft: Point,
+    val topRight: Point,
+    val bottomRight: Point,
+    val bottomLeft: Point
+)
+
 data class BoardWarpResult(
     val normalizedBoard: ByteArray, // placeholder for a raster image; choose your own format later
     val sideHint: SideHint? = null,
